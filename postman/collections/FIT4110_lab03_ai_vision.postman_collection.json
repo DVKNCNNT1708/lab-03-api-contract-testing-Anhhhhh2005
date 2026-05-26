@@ -456,7 +456,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Missing required field returns client error', function () { pm.expect([400, 422]).to.include(pm.response.code); });",
-                  "pm.test('Error response follows Problem shape', function () {",
+                  "pm.test('Error response follows ProblemDetails shape', function () {",
                   "  const json = pm.response.json();",
                   "  pm.expect(json).to.have.property('title');",
                   "  pm.expect(json).to.have.property('status');",
@@ -688,7 +688,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Oversized payload contract returns 413', function () { pm.expect(pm.response.code).to.eql(413); });",
-                  "pm.test('413 response follows Problem shape', function () {",
+                  "pm.test('413 response follows ProblemDetails shape', function () {",
                   "  const json = pm.response.json();",
                   "  pm.expect(json.status).to.be.within(400, 599);",
                   "});"

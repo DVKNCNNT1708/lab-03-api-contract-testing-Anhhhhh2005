@@ -1,62 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="FIT4110 Lab03 - AI Vision Contract Tests" tests="16" time="0.127">
-  <testsuite name="00_Health / GET /health - service is alive" id="f9f093aa-7014-4ad7-987e-a531715339c7" timestamp="2026-05-26T07:49:11.685Z" tests="2" failures="0" errors="0" time="0.039">
-    <testcase name="Status code is 200" time="0.039" classname="00HealthGetHealthServiceIsAlive"/>
-    <testcase name="Response has AI Vision health fields" time="0.039" classname="00HealthGetHealthServiceIsAlive"/>
+<testsuites name="FIT4110 Lab03 - AI Vision Contract Tests" tests="16" time="0.164">
+  <testsuite name="00_Health / GET /health - service is alive" id="836cd147-592c-4cda-a93f-6b8afb01400a" timestamp="2026-05-26T08:08:10.395Z" tests="2" failures="0" errors="0" time="0.040">
+    <testcase name="Status code is 200" time="0.040" classname="00HealthGetHealthServiceIsAlive"/>
+    <testcase name="Response has AI Vision health fields" time="0.040" classname="00HealthGetHealthServiceIsAlive"/>
   </testsuite>
-  <testsuite name="01_Functional / POST /vision/detect - image URL detection completes" id="91292cb2-43eb-4929-b183-a51c8af7e723" timestamp="2026-05-26T07:49:11.685Z" tests="2" failures="0" errors="0" time="0.019">
-    <testcase name="Status code is 200" time="0.019" classname="01FunctionalPostVisionDetectImageUrlDetectionCompletes"/>
-    <testcase name="Detection result has required fields" time="0.019" classname="01FunctionalPostVisionDetectImageUrlDetectionCompletes"/>
+  <testsuite name="01_Functional / POST /vision/detect - image URL detection completes" id="3ba61acb-dd55-47b9-b299-c9de4802c500" timestamp="2026-05-26T08:08:10.395Z" tests="2" failures="0" errors="0" time="0.020">
+    <testcase name="Status code is 200" time="0.020" classname="01FunctionalPostVisionDetectImageUrlDetectionCompletes"/>
+    <testcase name="Detection result has required fields" time="0.020" classname="01FunctionalPostVisionDetectImageUrlDetectionCompletes"/>
   </testsuite>
-  <testsuite name="01_Functional / GET /vision/detections/{detectionId} - retrieve result" id="c690fa00-a516-4ebe-a11f-2bee46559510" timestamp="2026-05-26T07:49:11.685Z" tests="2" failures="0" errors="0" time="0.007">
-    <testcase name="Status code is 200" time="0.007" classname="01FunctionalGetVisionDetectionsDetectionIdRetrieveResult"/>
-    <testcase name="Detection detail matches requested id shape" time="0.007" classname="01FunctionalGetVisionDetectionsDetectionIdRetrieveResult"/>
+  <testsuite name="01_Functional / GET /vision/detections/{detectionId} - retrieve result" id="988e8d75-aca9-41e4-969a-6decdc7fd173" timestamp="2026-05-26T08:08:10.395Z" tests="2" failures="0" errors="0" time="0.009">
+    <testcase name="Status code is 200" time="0.009" classname="01FunctionalGetVisionDetectionsDetectionIdRetrieveResult"/>
+    <testcase name="Detection detail matches requested id shape" time="0.009" classname="01FunctionalGetVisionDetectionsDetectionIdRetrieveResult"/>
   </testsuite>
-  <testsuite name="01_Functional / GET /vision/models/info - active model metadata" id="fee0aad5-0096-4ba4-82a6-5059e6ef67a7" timestamp="2026-05-26T07:49:11.685Z" tests="2" failures="0" errors="0" time="0.005">
-    <testcase name="Status code is 200" time="0.005" classname="01FunctionalGetVisionModelsInfoActiveModelMetadata"/>
-    <testcase name="Model info exposes supported sources and limits" time="0.005" classname="01FunctionalGetVisionModelsInfoActiveModelMetadata"/>
+  <testsuite name="01_Functional / GET /vision/models/info - active model metadata" id="8d5bde9b-b1b2-4ed6-923f-66ea4c8b1a91" timestamp="2026-05-26T08:08:10.395Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="Status code is 200" time="0.007" classname="01FunctionalGetVisionModelsInfoActiveModelMetadata"/>
+    <testcase name="Model info exposes supported sources and limits" time="0.007" classname="01FunctionalGetVisionModelsInfoActiveModelMetadata"/>
   </testsuite>
-  <testsuite name="01_Functional / GET /vision/detections/recent - list recent detections" id="6734989a-fa77-4208-a95d-6bfad38f8f63" timestamp="2026-05-26T07:49:11.685Z" tests="2" failures="0" errors="0" time="0.009">
+  <testsuite name="01_Functional / GET /vision/detections/recent - list recent detections" id="ba578ecf-5cb0-4997-b80f-5e622134e297" timestamp="2026-05-26T08:08:10.395Z" tests="2" failures="0" errors="0" time="0.009">
     <testcase name="Status code is 200" time="0.009" classname="01FunctionalGetVisionDetectionsRecentListRecentDetections"/>
     <testcase name="Recent detections response is pageable" time="0.009" classname="01FunctionalGetVisionDetectionsRecentListRecentDetections"/>
   </testsuite>
-  <testsuite name="02_Auth / GET /vision/models/info - valid token is accepted" id="f8d34255-c579-4407-9c6c-ce47e72821de" timestamp="2026-05-26T07:49:11.685Z" tests="1" failures="0" errors="0" time="0.003">
+  <testsuite name="02_Auth / GET /vision/models/info - valid token is accepted" id="f0c9695d-4cdf-4754-a83f-027d0919829d" timestamp="2026-05-26T08:08:10.395Z" tests="1" failures="0" errors="0" time="0.003">
     <testcase name="Valid token request returns success" time="0.003" classname="02AuthGetVisionModelsInfoValidTokenIsAccepted"/>
   </testsuite>
-  <testsuite name="02_Auth / POST /vision/detect - missing token is rejected" id="cd55caa3-efb6-4a83-abbd-243911b9b9a7" timestamp="2026-05-26T07:49:11.685Z" tests="1" failures="0" errors="0" time="0.009">
-    <testcase name="Missing token returns 401 or 403" time="0.009" classname="02AuthPostVisionDetectMissingTokenIsRejected"/>
+  <testsuite name="02_Auth / POST /vision/detect - missing token is rejected" id="48f02d0d-bf29-415c-96f5-8b53a1a06d65" timestamp="2026-05-26T08:08:10.395Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="Missing token returns 401 or 403" time="0.008" classname="02AuthPostVisionDetectMissingTokenIsRejected"/>
   </testsuite>
-  <testsuite name="02_Auth / POST /vision/detect - invalid token is rejected on real service" id="78d29338-6cbb-436c-8e1f-eb3a132bb70e" timestamp="2026-05-26T07:49:11.685Z" tests="1" failures="0" errors="0" time="0.003">
+  <testsuite name="02_Auth / POST /vision/detect - invalid token is rejected on real service" id="66c8d374-151a-41ff-96e0-8800d7899346" timestamp="2026-05-26T08:08:10.395Z" tests="1" failures="0" errors="0" time="0.003">
     <testcase name="Skipped on mock: Prism does not validate bearer token value" time="0.003" classname="02AuthPostVisionDetectInvalidTokenIsRejectedOnRealService"/>
   </testsuite>
-  <testsuite name="03_Negative / POST /vision/detect - missing cameraId returns validation error" id="fb718360-0433-4016-b258-7c8bc9ea875f" timestamp="2026-05-26T07:49:11.685Z" tests="2" failures="0" errors="0" time="0.006">
+  <testsuite name="03_Negative / POST /vision/detect - missing cameraId returns validation error" id="623c9cfb-9ea4-46b3-a62f-226039996bc5" timestamp="2026-05-26T08:08:10.395Z" tests="2" failures="0" errors="0" time="0.006">
     <testcase name="Missing required field returns client error" time="0.006" classname="03NegativePostVisionDetectMissingCameraIdReturnsValidationError"/>
-    <testcase name="Error response follows Problem shape" time="0.006" classname="03NegativePostVisionDetectMissingCameraIdReturnsValidationError"/>
+    <testcase name="Error response follows ProblemDetails shape" time="0.006" classname="03NegativePostVisionDetectMissingCameraIdReturnsValidationError"/>
   </testsuite>
-  <testsuite name="03_Negative / POST /vision/detect - invalid image URL and checksum fail schema" id="0613b4fc-39f0-4cad-ad49-1313ac1c66af" timestamp="2026-05-26T07:49:11.685Z" tests="2" failures="0" errors="0" time="0.005">
-    <testcase name="Invalid image source returns client error" time="0.005" classname="03NegativePostVisionDetectInvalidImageUrlAndChecksumFailSchema"/>
-    <testcase name="Error response includes detail" time="0.005" classname="03NegativePostVisionDetectInvalidImageUrlAndChecksumFailSchema"/>
+  <testsuite name="03_Negative / POST /vision/detect - invalid image URL and checksum fail schema" id="d79fca0c-76f0-411e-b8f6-598bfb49fc5e" timestamp="2026-05-26T08:08:10.395Z" tests="2" failures="0" errors="0" time="0.006">
+    <testcase name="Invalid image source returns client error" time="0.006" classname="03NegativePostVisionDetectInvalidImageUrlAndChecksumFailSchema"/>
+    <testcase name="Error response includes detail" time="0.006" classname="03NegativePostVisionDetectInvalidImageUrlAndChecksumFailSchema"/>
   </testsuite>
-  <testsuite name="03_Negative / GET /vision/detections/recent - limit above max is rejected" id="2301ca00-867e-4a42-97b0-9437af1018af" timestamp="2026-05-26T07:49:11.685Z" tests="1" failures="0" errors="0" time="0.003">
-    <testcase name="Invalid limit returns client error" time="0.003" classname="03NegativeGetVisionDetectionsRecentLimitAboveMaxIsRejected"/>
+  <testsuite name="03_Negative / GET /vision/detections/recent - limit above max is rejected" id="fab4a1ed-3a41-45f1-8112-aada8c242aee" timestamp="2026-05-26T08:08:10.395Z" tests="1" failures="0" errors="0" time="0.004">
+    <testcase name="Invalid limit returns client error" time="0.004" classname="03NegativeGetVisionDetectionsRecentLimitAboveMaxIsRejected"/>
   </testsuite>
-  <testsuite name="04_Boundary_Reliability / POST /vision/detect - asynchronous 202 response is supported" id="b3599d9e-6914-42e6-a75e-9b4aaac71a38" timestamp="2026-05-26T07:49:11.685Z" tests="2" failures="0" errors="0" time="0.005">
+  <testsuite name="04_Boundary_Reliability / POST /vision/detect - asynchronous 202 response is supported" id="9a38b770-295a-497f-adf8-9a09d073e0a6" timestamp="2026-05-26T08:08:10.395Z" tests="2" failures="0" errors="0" time="0.005">
     <testcase name="Async detection returns 202" time="0.005" classname="04BoundaryReliabilityPostVisionDetectAsynchronous202ResponseIsSupported"/>
     <testcase name="Accepted response exposes polling information" time="0.005" classname="04BoundaryReliabilityPostVisionDetectAsynchronous202ResponseIsSupported"/>
   </testsuite>
-  <testsuite name="04_Boundary_Reliability / POST /vision/detect - oversized image gets 413 contract response" id="447c317a-adfd-4bb1-8067-83f2e8b16d3e" timestamp="2026-05-26T07:49:11.685Z" tests="2" failures="0" errors="0" time="0.005">
+  <testsuite name="04_Boundary_Reliability / POST /vision/detect - oversized image gets 413 contract response" id="ef381b55-dca4-4228-809a-372e9bce1a1f" timestamp="2026-05-26T08:08:10.395Z" tests="2" failures="0" errors="0" time="0.005">
     <testcase name="Oversized payload contract returns 413" time="0.005" classname="04BoundaryReliabilityPostVisionDetectOversizedImageGets413ContractResponse"/>
-    <testcase name="413 response follows Problem shape" time="0.005" classname="04BoundaryReliabilityPostVisionDetectOversizedImageGets413ContractResponse"/>
+    <testcase name="413 response follows ProblemDetails shape" time="0.005" classname="04BoundaryReliabilityPostVisionDetectOversizedImageGets413ContractResponse"/>
   </testsuite>
-  <testsuite name="04_Boundary_Reliability / GET /vision/detections/recent - minimum limit boundary accepted" id="c4047af8-af30-40b0-a958-2c685492ab07" timestamp="2026-05-26T07:49:11.685Z" tests="2" failures="0" errors="0" time="0.002">
-    <testcase name="Minimum limit returns success" time="0.002" classname="04BoundaryReliabilityGetVisionDetectionsRecentMinimumLimitBoundaryAccepted"/>
-    <testcase name="Boundary checks response page shape" time="0.002" classname="04BoundaryReliabilityGetVisionDetectionsRecentMinimumLimitBoundaryAccepted"/>
+  <testsuite name="04_Boundary_Reliability / GET /vision/detections/recent - minimum limit boundary accepted" id="c36e8779-f41c-4ddd-9fa1-4e06beaae37a" timestamp="2026-05-26T08:08:10.395Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="Minimum limit returns success" time="0.003" classname="04BoundaryReliabilityGetVisionDetectionsRecentMinimumLimitBoundaryAccepted"/>
+    <testcase name="Boundary checks response page shape" time="0.003" classname="04BoundaryReliabilityGetVisionDetectionsRecentMinimumLimitBoundaryAccepted"/>
   </testsuite>
-  <testsuite name="05_Consumer_side_Smoke / Consumer smoke - AI Vision can callback Camera Stream mock" id="8e592774-b5c1-467a-84d9-ac53aee6b0df" timestamp="2026-05-26T07:49:11.685Z" tests="2" failures="0" errors="0" time="0.005">
-    <testcase name="Camera Stream mock accepts callback" time="0.005" classname="05ConsumerSideSmokeConsumerSmokeAiVisionCanCallbackCameraStreamMock"/>
-    <testcase name="Consumer can parse callback acknowledgement" time="0.005" classname="05ConsumerSideSmokeConsumerSmokeAiVisionCanCallbackCameraStreamMock"/>
+  <testsuite name="05_Consumer_side_Smoke / Consumer smoke - AI Vision can callback Camera Stream mock" id="7281f8c3-265a-45f8-854e-6d4ffafebd94" timestamp="2026-05-26T08:08:10.395Z" tests="2" failures="0" errors="0" time="0.033">
+    <testcase name="Camera Stream mock accepts callback" time="0.033" classname="05ConsumerSideSmokeConsumerSmokeAiVisionCanCallbackCameraStreamMock"/>
+    <testcase name="Consumer can parse callback acknowledgement" time="0.033" classname="05ConsumerSideSmokeConsumerSmokeAiVisionCanCallbackCameraStreamMock"/>
   </testsuite>
-  <testsuite name="06_Local_only_NonFunctional / POST /vision/detect - local processing latency threshold" id="f19daebc-3f58-46e8-9a0c-0bfcc5f5d2be" timestamp="2026-05-26T07:49:11.685Z" tests="1" failures="0" errors="0" time="0.002">
-    <testcase name="Skipped on mock: mock latency is not evidence of real service reliability" time="0.002" classname="06LocalOnlyNonFunctionalPostVisionDetectLocalProcessingLatencyThreshold"/>
+  <testsuite name="06_Local_only_NonFunctional / POST /vision/detect - local processing latency threshold" id="493f3388-33c4-43b2-b6f0-833a9d3317e0" timestamp="2026-05-26T08:08:10.395Z" tests="1" failures="0" errors="0" time="0.003">
+    <testcase name="Skipped on mock: mock latency is not evidence of real service reliability" time="0.003" classname="06LocalOnlyNonFunctionalPostVisionDetectLocalProcessingLatencyThreshold"/>
   </testsuite>
 </testsuites>

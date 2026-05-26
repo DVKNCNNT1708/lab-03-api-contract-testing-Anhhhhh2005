@@ -159,6 +159,8 @@ paths:
           $ref: '#/components/responses/PayloadTooLarge'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -239,6 +241,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -290,6 +294,10 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -367,7 +375,7 @@ components:
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: '#/components/schemas/ProblemDetails'
           examples:
             invalidJson:
               value:
@@ -382,43 +390,58 @@ components:
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: '#/components/schemas/ProblemDetails'
     Forbidden:
       description: Caller is authenticated but cannot access this resource.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: '#/components/schemas/ProblemDetails'
     NotFound:
       description: Requested detection does not exist.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: '#/components/schemas/ProblemDetails'
     Conflict:
       description: Idempotency key conflicts with a different detection payload.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: '#/components/schemas/ProblemDetails'
     PayloadTooLarge:
       description: Image or referenced frame exceeds the negotiated size limit.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: '#/components/schemas/ProblemDetails'
     UnprocessableEntity:
       description: Request is syntactically valid but the image cannot be processed.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: '#/components/schemas/ProblemDetails'
+    TooManyRequests:
+      description: Caller exceeded the allowed request rate.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          examples:
+            rateLimited:
+              value:
+                type: https://api.smart-campus.local/problems/rate-limited
+                title: Too Many Requests
+                status: 429
+                detail: Too many detection requests in a short period.
+                instance: /vision/detect
+                correlationId: corr-20260518-vision-0001
     InternalServerError:
       description: Unexpected provider error.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Problem'
+            $ref: '#/components/schemas/ProblemDetails'
 
   schemas:
     HealthStatus:
@@ -704,7 +727,7 @@ components:
       type: string
       enum: [LOW, MEDIUM, HIGH, CRITICAL]
 
-    Problem:
+    ProblemDetails:
       type: object
       additionalProperties: false
       required: [type, title, status, detail, instance, correlationId]

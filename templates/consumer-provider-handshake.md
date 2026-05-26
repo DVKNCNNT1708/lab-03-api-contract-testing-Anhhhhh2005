@@ -53,7 +53,7 @@ Content-Type: application/json
 
 - [x] Consumer gọi mock thành công.
 - [x] Consumer parse được field cần dùng: `accepted`, `receivedAt`, `correlationId`.
-- [x] Consumer hiểu lỗi 4xx/5xx provider trả về qua `Problem`.
+- [x] Consumer hiểu lỗi 4xx/5xx provider trả về qua `ProblemDetails`.
 - [x] Có Newman report trong `reports/newman-report.xml` và `reports/newman-report.html`.
 
 ## Ghi chú thay đổi hợp đồng

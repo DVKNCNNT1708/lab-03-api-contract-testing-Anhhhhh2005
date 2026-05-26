@@ -563,7 +563,7 @@ jobs:
           nohup npm run mock:camera > prism-camera.log 2>&1 &
 
       - name: Wait for mock servers
-        run: npx wait-on http://localhost:4010/health http://localhost:4011/health --timeout 30000
+        run: npx wait-on http-get://localhost:4010/health http-get://localhost:4011/health --timeout 30000
 
       - name: Run Newman on mock environment
         run: npm run test:mock

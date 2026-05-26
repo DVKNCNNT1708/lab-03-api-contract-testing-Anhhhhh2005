@@ -7,11 +7,11 @@ TC05,01_Functional,/vision/detections/recent,GET,List recent detections,"cameraI
 TC06,02_Auth,/vision/models/info,GET,Valid token is accepted,Authorization Bearer {{authToken}},200,request succeeds,auth,Pass,reports/newman-report.xml
 TC07,02_Auth,/vision/detect,POST,Missing token is rejected,mock-data/vision-detection-valid.json,401/403,request rejected without Authorization,auth,Pass,reports/newman-report.xml
 TC08,02_Auth,/vision/detect,POST,Invalid token is rejected on real service,mock-data/vision-detection-valid.json,401/403 on local,"mock documents skip; local must reject",auth,Pass on mock,reports/newman-report.xml
-TC09,03_Negative,/vision/detect,POST,Missing required cameraId,mock-data/vision-detection-invalid-missing-camera.json,400/422,Problem status between 400 and 599,negative,Pass,reports/newman-report.xml
+TC09,03_Negative,/vision/detect,POST,Missing required cameraId,mock-data/vision-detection-invalid-missing-camera.json,400/422,ProblemDetails status between 400 and 599,negative,Pass,reports/newman-report.xml
 TC10,03_Negative,/vision/detect,POST,Invalid image URL and checksum,inline invalid source body,400/422,error response has detail,negative,Pass,reports/newman-report.xml
 TC11,03_Negative,/vision/detections/recent,GET,Limit above max is rejected,limit=101,400/422,client error returned,negative,Pass,reports/newman-report.xml
 TC12,04_Boundary_Reliability,/vision/detect,POST,Async detection response contract,FRAME_METADATA body with Prefer code=202,202,"status=PENDING, pollUrl exists",boundary,Pass,reports/newman-report.xml
-TC13,04_Boundary_Reliability,/vision/detect,POST,Oversized image contract response,mock-data/vision-detection-valid.json with Prefer code=413,413,Problem status between 400 and 599,boundary,Pass,reports/newman-report.xml
+TC13,04_Boundary_Reliability,/vision/detect,POST,Oversized image contract response,mock-data/vision-detection-valid.json with Prefer code=413,413,ProblemDetails status between 400 and 599,boundary,Pass,reports/newman-report.xml
 TC14,04_Boundary_Reliability,/vision/detections/recent,GET,Minimum limit boundary accepted,limit=1,200,page shape returned,boundary,Pass,reports/newman-report.xml
 TC15,05_Consumer_side_Smoke,/callbacks/vision,POST,AI Vision can call Camera Stream callback mock,mock-data/vision-detection-boundary-confidence.json,202,"accepted=true, receivedAt, correlationId",consumer-smoke,Pass,reports/newman-report.xml
 TC16,06_Local_only_NonFunctional,/vision/detect,POST,Local processing latency threshold,mock-data/vision-detection-valid.json,200 on mock; <1000ms on local,"mock skip documents limitation; local asserts response time",nonfunctional,Pass on mock,reports/newman-report.xml

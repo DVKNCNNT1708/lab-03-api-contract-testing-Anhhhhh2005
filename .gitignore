@@ -8,3 +8,4 @@ reports/*.html
 !reports/newman-report.html
 !reports/contract-lint-report.txt
 prism.log
+prism*.log

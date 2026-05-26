@@ -22,7 +22,7 @@ Ghi chú: Prism mock có thể kiểm tra thiếu token, nhưng không chứng m
 - [x] Có test thiếu field bắt buộc `cameraId`.
 - [x] Có test payload không hợp lệ cho `imageUrl` và `checksumSha256`.
 - [x] Có test sai giá trị ngoài miền `limit=101`.
-- [x] Lỗi trả về theo cùng một error model `Problem`.
+- [x] Lỗi trả về theo cùng một error model `ProblemDetails`.
 
 ## 4. Boundary tests
 

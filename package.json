@@ -12,7 +12,7 @@
     "test:mock": "newman run postman/collections/FIT4110_lab03_ai_vision.postman_collection.json -e postman/environments/FIT4110_lab03_mock.postman_environment.json --reporters cli,junit --reporter-junit-export reports/newman-report.xml",
     "test:local": "newman run postman/collections/FIT4110_lab03_ai_vision.postman_collection.json -e postman/environments/FIT4110_lab03_local.postman_environment.json --reporters cli,junit --reporter-junit-export reports/newman-report-local.xml",
     "test:html": "newman run postman/collections/FIT4110_lab03_ai_vision.postman_collection.json -e postman/environments/FIT4110_lab03_mock.postman_environment.json --reporters cli,htmlextra --reporter-htmlextra-export reports/newman-report.html",
-    "test:ci": "npm run lint:contracts && npm run test:mock"
+    "test:ci": "sh -c 'npm run lint:contracts && npm run mock:vision > prism-vision.log 2>&1 & VISION_PID=$!; npm run mock:camera > prism-camera.log 2>&1 & CAMERA_PID=$!; trap \"kill $VISION_PID $CAMERA_PID 2>/dev/null || true\" EXIT; npx wait-on http-get://localhost:4010/health http-get://localhost:4011/health --timeout 30000 && npm run test:mock'"
   },
   "devDependencies": {
     "@stoplight/prism-cli": "^5.14.2",

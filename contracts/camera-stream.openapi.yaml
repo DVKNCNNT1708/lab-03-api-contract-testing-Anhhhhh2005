@@ -78,13 +78,19 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: '#/components/schemas/ProblemDetails'
         '401':
           description: Bearer token is missing or invalid.
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: '#/components/schemas/ProblemDetails'
+        '429':
+          description: Caller exceeded the allowed callback rate.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
 components:
   securitySchemes:
     bearerAuth:
@@ -150,7 +156,7 @@ components:
           format: date-time
         correlationId:
           type: string
-    Problem:
+    ProblemDetails:
       type: object
       additionalProperties: false
       required: [type, title, status, detail]
