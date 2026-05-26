@@ -86,18 +86,18 @@ FIT4110_lab03_postman_mock_testing/
 ├── package.json
 ├── Makefile
 ├── contracts/
-│   ├── iot-ingestion.openapi.yaml
-│   └── ai-vision.openapi.yaml
+│   ├── ai-vision.openapi.yaml
+│   └── camera-stream.openapi.yaml
 ├── postman/
 │   ├── collections/
-│   │   └── FIT4110_lab03_iot_ingestion.postman_collection.json
+│   │   └── FIT4110_lab03_ai_vision.postman_collection.json
 │   └── environments/
 │       ├── FIT4110_lab03_mock.postman_environment.json
 │       └── FIT4110_lab03_local.postman_environment.json
 ├── mock-data/
-│   ├── sensor-reading-valid.json
-│   ├── sensor-reading-invalid-missing-device.json
-│   └── sensor-reading-boundary.json
+│   ├── vision-detection-valid.json
+│   ├── vision-detection-invalid-missing-camera.json
+│   └── vision-detection-boundary-confidence.json
 ├── docs/
 │   ├── TEAM_TASKS.md
 │   ├── CONSUMER_SIDE_TESTING.md
@@ -162,13 +162,13 @@ Tất cả các giá trị này phải đặt trong Postman Environment.
 | `env` | `mock` | `local` | Môi trường đang chạy test |
 | `baseUrl` | `http://localhost:4010` | `http://localhost:8000` | URL service chính |
 | `authToken` | `lab-token` | `local-dev-token` | Token hoặc API key |
-| `teamName` | `team-iot` | `team-iot` | Tên nhóm hoặc tên service |
-| `aiVisionMockUrl` | `http://localhost:4011` | `http://localhost:4011` | URL mock của service phụ thuộc |
+| `teamName` | `team-vision` | `team-vision` | Tên nhóm hoặc tên service |
+| `cameraStreamMockUrl` | `http://localhost:4011` | `http://localhost:4011` | URL mock của service phụ thuộc |
 
 Ví dụ URL trong Postman:
 
 ```text
-{{baseUrl}}/readings
+{{baseUrl}}/vision/detect
 ```
 
 Ví dụ Authorization header:
@@ -181,16 +181,16 @@ Authorization: Bearer {{authToken}}
 
 ## 6. Chạy Mock Server
 
-Contract mẫu của IoT Ingestion nằm tại:
+Contract chính của AI Vision nằm tại:
 
 ```text
-contracts/iot-ingestion.openapi.yaml
+contracts/ai-vision.openapi.yaml
 ```
 
-Chạy mock IoT:
+Chạy mock AI Vision:
 
 ```bash
-npm run mock:iot
+npm run mock:vision
 ```
 
 Mock server mặc định chạy tại:
@@ -205,13 +205,13 @@ Kiểm tra mock server:
 curl http://localhost:4010/health
 ```
 
-Nếu cần chạy mock AI Vision cho consumer-side smoke test:
+Nếu cần chạy mock Camera Stream cho consumer-side smoke test:
 
 ```bash
-npm run mock:vision
+npm run mock:camera
 ```
 
-Mock AI Vision có thể chạy tại:
+Mock Camera Stream chạy tại:
 
 ```text
 http://localhost:4011
@@ -274,7 +274,7 @@ reports/
 Ví dụ chạy Newman trực tiếp:
 
 ```bash
-npx newman run postman/collections/FIT4110_lab03_iot_ingestion.postman_collection.json \
+npx newman run postman/collections/FIT4110_lab03_ai_vision.postman_collection.json \
   -e postman/environments/FIT4110_lab03_mock.postman_environment.json \
   -r cli,junit,htmlextra \
   --reporter-junit-export reports/newman-report.xml \
@@ -510,9 +510,9 @@ Các file trong `mock-data/` nên được dùng cho test, không chỉ để th
 Ví dụ chạy Newman với data file:
 
 ```bash
-npx newman run postman/collections/FIT4110_lab03_iot_ingestion.postman_collection.json \
+npx newman run postman/collections/FIT4110_lab03_ai_vision.postman_collection.json \
   -e postman/environments/FIT4110_lab03_mock.postman_environment.json \
-  --iteration-data mock-data/sensor-reading-valid.json
+  --iteration-data mock-data/vision-detection-valid.json
 ```
 
 Nếu collection nhúng JSON trực tiếp trong `body.raw`, cần đảm bảo `test-case-matrix.csv` mô tả đúng dữ liệu được dùng trong collection.
@@ -557,18 +557,22 @@ jobs:
       - name: Lint OpenAPI contracts
         run: npx @stoplight/spectral-cli lint contracts/*.yaml
 
-      - name: Start Prism mock server
-        run: nohup npm run mock:iot > prism.log 2>&1 &
+      - name: Start Prism mock servers
+        run: |
+          nohup npm run mock:vision > prism-vision.log 2>&1 &
+          nohup npm run mock:camera > prism-camera.log 2>&1 &
 
-      - name: Wait for mock server
-        run: npx wait-on http://localhost:4010/health --timeout 30000
+      - name: Wait for mock servers
+        run: npx wait-on http://localhost:4010/health http://localhost:4011/health --timeout 30000
 
       - name: Run Newman on mock environment
         run: npm run test:mock
 
       - name: Show Prism log on failure
         if: failure()
-        run: cat prism.log || true
+        run: |
+          cat prism-vision.log || true
+          cat prism-camera.log || true
 
       - name: Upload Newman reports
         if: always()
@@ -644,7 +648,7 @@ Một nhóm được xem là hoàn thành Lab 03 khi:
 
 | Lỗi | Nguyên nhân | Cách xử lý |
 |---|---|---|
-| `ECONNREFUSED` | Mock server chưa chạy | Chạy `npm run mock:iot` và kiểm tra `/health` |
+| `ECONNREFUSED` | Mock server chưa chạy | Chạy `npm run mock:vision` và `npm run mock:camera`, sau đó kiểm tra `/health` |
 | Newman chạy vào mock dù muốn test local | Environment local chưa được load hoặc collection còn hardcode `baseUrl` | Kiểm tra tham số `-e` và collection variables |
 | `401 Unauthorized` ở happy path | Thiếu hoặc sai `authToken` | Kiểm tra environment và Authorization header |
 | Auth test pass trên mock nhưng fail trên local | Mock không validate auth thật | Chạy lại với service thật và điều chỉnh test |
