@@ -1,0 +1,10 @@
+{
+  "detectionId": "det_01HY6AIVISION0000000001",
+  "cameraId": "CAM-A2-001",
+  "motionEventId": "motion-20260518-0001",
+  "status": "COMPLETED",
+  "riskLevel": "HIGH",
+  "overallConfidence": 1,
+  "completedAt": "2026-05-18T06:10:17Z",
+  "correlationId": "corr-20260518-vision-0001"
+}

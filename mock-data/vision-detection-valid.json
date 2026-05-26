@@ -1,0 +1,13 @@
+{
+  "cameraId": "CAM-A2-001",
+  "campusId": "CAMPUS-HCM",
+  "capturedAt": "2026-05-18T06:10:15Z",
+  "motionEventId": "motion-20260518-0001",
+  "source": {
+    "sourceType": "IMAGE_URL",
+    "imageUrl": "https://media.smart-campus.local/frames/CAM-A2-001/2026/05/18/frame-0001.jpg",
+    "checksumSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "requestedModelVersion": "vision-campus-v1.4",
+  "callbackUrl": null
+}

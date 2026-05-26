@@ -5,6 +5,21 @@
 **Buổi 3:** Kiểm thử tích hợp với Postman + Mock Server  
 **Case study:** Smart Campus Operations Platform  
 
+## Bài làm trong repo này
+
+Repo đã được cấu hình theo contract Lab 02 của nhóm:
+
+- Service chính: **Smart Campus AI Vision Detection API**
+- Contract chính: `contracts/ai-vision.openapi.yaml`
+- Mock phụ thuộc cho consumer-side smoke test: `contracts/camera-stream.openapi.yaml`
+- Postman collection: `postman/collections/FIT4110_lab03_ai_vision.postman_collection.json`
+- Mock AI Vision: `npm run mock:vision` tại `http://localhost:4010`
+- Mock Camera Stream callback: `npm run mock:camera` tại `http://localhost:4011`
+- Chạy test mock: `npm run test:mock`
+- Xuất HTML report: `npm run test:html`
+- Chạy local service thật tối thiểu: `npm run local:vision`
+- Local environment đã cấu hình `baseUrl=http://localhost:8000`; chạy `npm run test:local` khi service thật đã được khởi động.
+
 ## Nội dung chính
 
 Ở Lab 02, mỗi nhóm đã thiết kế `openapi.yaml` như một **hợp đồng API** giữa các service.

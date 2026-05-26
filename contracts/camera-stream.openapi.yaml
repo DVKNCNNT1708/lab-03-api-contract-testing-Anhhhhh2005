@@ -1,0 +1,168 @@
+openapi: 3.1.0
+info:
+  title: Smart Campus Camera Stream Callback API
+  version: 1.0.0
+  contact:
+    name: Camera Stream A2
+    email: camera-stream@example.edu.vn
+  description: Minimal dependent-service contract used by AI Vision consumer-side smoke tests.
+servers:
+  - url: http://localhost:4011
+    description: Prism mock server for Camera Stream callbacks
+tags:
+  - name: health
+    description: Camera Stream mock health status.
+  - name: callbacks
+    description: Camera Stream callback endpoints consumed by AI Vision.
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      operationId: getCameraStreamMockHealth
+      summary: Check Camera Stream callback mock health
+      description: Returns current availability information for the Camera Stream callback mock.
+      tags: [health]
+      security: []
+      responses:
+        '200':
+          description: Camera Stream callback mock is available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+              examples:
+                ok:
+                  value:
+                    status: ok
+                    service: camera-stream
+                    checkedAt: '2026-05-26T06:00:00Z'
+  /callbacks/vision:
+    post:
+      operationId: receiveVisionCallback
+      summary: Receive asynchronous AI Vision detection result
+      description: Accepts a completed or failed detection callback from AI Vision so Camera Stream can update the original motion event.
+      tags: [callbacks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisionCallback'
+            examples:
+              completed:
+                value:
+                  detectionId: det_01HY6AIVISION0000000001
+                  cameraId: CAM-A2-001
+                  motionEventId: motion-20260518-0001
+                  status: COMPLETED
+                  riskLevel: HIGH
+                  overallConfidence: 0.93
+                  completedAt: '2026-05-18T06:10:17Z'
+                  correlationId: corr-20260518-vision-0001
+      responses:
+        '202':
+          description: Callback accepted by Camera Stream.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallbackAccepted'
+              examples:
+                accepted:
+                  value:
+                    accepted: true
+                    receivedAt: '2026-05-18T06:10:18Z'
+                    correlationId: corr-20260518-vision-0001
+        '400':
+          description: Callback payload is invalid.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          description: Bearer token is missing or invalid.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    HealthStatus:
+      type: object
+      additionalProperties: false
+      required: [status, service, checkedAt]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        service:
+          type: string
+        checkedAt:
+          type: string
+          format: date-time
+    VisionCallback:
+      type: object
+      additionalProperties: false
+      required: [detectionId, cameraId, motionEventId, status, riskLevel, overallConfidence, completedAt, correlationId]
+      properties:
+        detectionId:
+          type: string
+          pattern: '^det_[A-Za-z0-9]+$'
+        cameraId:
+          type: string
+          minLength: 3
+          maxLength: 60
+        motionEventId:
+          type: string
+          minLength: 8
+          maxLength: 80
+        status:
+          type: string
+          enum: [COMPLETED, FAILED]
+        riskLevel:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        overallConfidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        completedAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+          minLength: 8
+          maxLength: 80
+    CallbackAccepted:
+      type: object
+      additionalProperties: false
+      required: [accepted, receivedAt, correlationId]
+      properties:
+        accepted:
+          type: boolean
+        receivedAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+    Problem:
+      type: object
+      additionalProperties: false
+      required: [type, title, status, detail]
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string

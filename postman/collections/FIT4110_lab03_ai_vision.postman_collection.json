@@ -1,0 +1,878 @@
+{
+  "info": {
+    "name": "FIT4110 Lab03 - AI Vision Contract Tests",
+    "description": "Contract tests generated from Lab 2 Smart Campus AI Vision Detection API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00_Health",
+      "item": [
+        {
+          "name": "GET /health - service is alive",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response has AI Vision health fields', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.status).to.be.oneOf(['ok', 'degraded']);",
+                  "  pm.expect(json.service).to.eql('ai-vision');",
+                  "  pm.expect(json).to.have.property('checkedAt');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01_Functional",
+      "item": [
+        {
+          "name": "POST /vision/detect - image URL detection completes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotencyKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vision/detect",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "detect"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cameraId\": \"CAM-A2-001\",\n  \"campusId\": \"CAMPUS-HCM\",\n  \"capturedAt\": \"2026-05-18T06:10:15Z\",\n  \"motionEventId\": \"motion-20260518-0001\",\n  \"source\": {\n    \"sourceType\": \"IMAGE_URL\",\n    \"imageUrl\": \"https://media.smart-campus.local/frames/CAM-A2-001/2026/05/18/frame-0001.jpg\",\n    \"checksumSha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"requestedModelVersion\": \"vision-campus-v1.4\",\n  \"callbackUrl\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Detection result has required fields', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('detectionId');",
+                  "  pm.expect(json.cameraId).to.eql('CAM-A2-001');",
+                  "  pm.expect(json.objects).to.be.an('array');",
+                  "  pm.expect(json.overallConfidence).to.be.within(0, 1);",
+                  "  pm.expect(json.riskLevel).to.be.oneOf(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /vision/detections/{detectionId} - retrieve result",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vision/detections/{{detectionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "detections",
+                "{{detectionId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Detection detail matches requested id shape', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.detectionId).to.match(/^det_[A-Za-z0-9]+$/);",
+                  "  pm.expect(json.status).to.be.oneOf(['PENDING', 'COMPLETED', 'FAILED']);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /vision/models/info - active model metadata",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vision/models/info",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "models",
+                "info"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Model info exposes supported sources and limits', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.modelVersion).to.be.a('string');",
+                  "  pm.expect(json.supportedSourceTypes).to.include('IMAGE_URL');",
+                  "  pm.expect(json.supportedObjectTypes).to.include('PERSON');",
+                  "  pm.expect(json.maxImageBytes).to.be.above(0);",
+                  "  pm.expect(json.maxProcessingMs).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /vision/detections/recent - list recent detections",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vision/detections/recent?cameraId=CAM-A2-001&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "detections",
+                "recent?cameraId=CAM-A2-001&limit=5"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Recent detections response is pageable', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.items).to.be.an('array');",
+                  "  pm.expect(json).to.have.property('hasMore');",
+                  "  pm.expect(json).to.have.property('nextCursor');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02_Auth",
+      "item": [
+        {
+          "name": "GET /vision/models/info - valid token is accepted",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vision/models/info",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "models",
+                "info"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Valid token request returns success', function () { pm.expect(pm.response.code).to.eql(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /vision/detect - missing token is rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotencyKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vision/detect",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "detect"
+              ]
+            },
+            "description": "Auth test thật: không dùng Prefer để ép status code.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cameraId\": \"CAM-A2-001\",\n  \"campusId\": \"CAMPUS-HCM\",\n  \"capturedAt\": \"2026-05-18T06:10:15Z\",\n  \"motionEventId\": \"motion-20260518-0001\",\n  \"source\": {\n    \"sourceType\": \"IMAGE_URL\",\n    \"imageUrl\": \"https://media.smart-campus.local/frames/CAM-A2-001/2026/05/18/frame-0001.jpg\",\n    \"checksumSha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"requestedModelVersion\": \"vision-campus-v1.4\",\n  \"callbackUrl\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Missing token returns 401 or 403', function () { pm.expect([401, 403]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /vision/detect - invalid token is rejected on real service",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid-token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotencyKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vision/detect",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "detect"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cameraId\": \"CAM-A2-001\",\n  \"campusId\": \"CAMPUS-HCM\",\n  \"capturedAt\": \"2026-05-18T06:10:15Z\",\n  \"motionEventId\": \"motion-20260518-0001\",\n  \"source\": {\n    \"sourceType\": \"IMAGE_URL\",\n    \"imageUrl\": \"https://media.smart-campus.local/frames/CAM-A2-001/2026/05/18/frame-0001.jpg\",\n    \"checksumSha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"requestedModelVersion\": \"vision-campus-v1.4\",\n  \"callbackUrl\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const env = pm.environment.get('env') || 'mock';",
+                  "if (env === 'mock') {",
+                  "  pm.test('Skipped on mock: Prism does not validate bearer token value', function () { pm.expect(true).to.eql(true); });",
+                  "} else {",
+                  "  pm.test('Invalid token returns 401 or 403', function () { pm.expect([401, 403]).to.include(pm.response.code); });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03_Negative",
+      "item": [
+        {
+          "name": "POST /vision/detect - missing cameraId returns validation error",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotencyKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vision/detect",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "detect"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campusId\": \"CAMPUS-HCM\",\n  \"capturedAt\": \"2026-05-18T06:10:15Z\",\n  \"motionEventId\": \"motion-20260518-0001\",\n  \"source\": {\n    \"sourceType\": \"IMAGE_URL\",\n    \"imageUrl\": \"https://media.smart-campus.local/frames/CAM-A2-001/2026/05/18/frame-0001.jpg\",\n    \"checksumSha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"requestedModelVersion\": \"vision-campus-v1.4\",\n  \"callbackUrl\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Missing required field returns client error', function () { pm.expect([400, 422]).to.include(pm.response.code); });",
+                  "pm.test('Error response follows Problem shape', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('title');",
+                  "  pm.expect(json).to.have.property('status');",
+                  "  pm.expect(json.status).to.be.within(400, 599);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /vision/detect - invalid image URL and checksum fail schema",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "idem-CAM-A2-001-20260518-invalid"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vision/detect",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "detect"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cameraId\": \"CAM-A2-001\",\n  \"campusId\": \"CAMPUS-HCM\",\n  \"capturedAt\": \"2026-05-18T06:10:15Z\",\n  \"motionEventId\": \"motion-20260518-0001\",\n  \"source\": {\n    \"sourceType\": \"IMAGE_URL\",\n    \"imageUrl\": \"not-a-url\",\n    \"checksumSha256\": \"bad-checksum\"\n  },\n  \"requestedModelVersion\": \"vision-campus-v1.4\",\n  \"callbackUrl\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Invalid image source returns client error', function () { pm.expect([400, 422]).to.include(pm.response.code); });",
+                  "pm.test('Error response includes detail', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('detail');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /vision/detections/recent - limit above max is rejected",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vision/detections/recent?limit=101",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "detections",
+                "recent?limit=101"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Invalid limit returns client error', function () { pm.expect([400, 422]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04_Boundary_Reliability",
+      "item": [
+        {
+          "name": "POST /vision/detect - asynchronous 202 response is supported",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "idem-CAM-A2-002-20260518-0002"
+              },
+              {
+                "key": "Prefer",
+                "value": "code=202"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vision/detect",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "detect"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cameraId\": \"CAM-A2-002\",\n  \"campusId\": \"CAMPUS-HCM\",\n  \"capturedAt\": \"2026-05-18T06:12:30Z\",\n  \"motionEventId\": \"motion-20260518-0002\",\n  \"source\": {\n    \"sourceType\": \"FRAME_METADATA\",\n    \"streamId\": \"stream-main-hall-a2\",\n    \"frameNumber\": 835122,\n    \"storageBucket\": \"campus-camera-frames\",\n    \"objectKey\": \"CAM-A2-002/2026/05/18/frame-835122.jpg\"\n  },\n  \"requestedModelVersion\": null,\n  \"callbackUrl\": \"https://camera-stream.smart-campus.local/callbacks/vision\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Async detection returns 202', function () { pm.response.to.have.status(202); });",
+                  "pm.test('Accepted response exposes polling information', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.status).to.eql('PENDING');",
+                  "  pm.expect(json.pollUrl).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /vision/detect - oversized image gets 413 contract response",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "idem-CAM-A2-001-20260518-large"
+              },
+              {
+                "key": "Prefer",
+                "value": "code=413"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vision/detect",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "detect"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cameraId\": \"CAM-A2-001\",\n  \"campusId\": \"CAMPUS-HCM\",\n  \"capturedAt\": \"2026-05-18T06:10:15Z\",\n  \"motionEventId\": \"motion-20260518-0001\",\n  \"source\": {\n    \"sourceType\": \"IMAGE_URL\",\n    \"imageUrl\": \"https://media.smart-campus.local/frames/CAM-A2-001/2026/05/18/frame-0001.jpg\",\n    \"checksumSha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"requestedModelVersion\": \"vision-campus-v1.4\",\n  \"callbackUrl\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Oversized payload contract returns 413', function () { pm.expect(pm.response.code).to.eql(413); });",
+                  "pm.test('413 response follows Problem shape', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.status).to.be.within(400, 599);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /vision/detections/recent - minimum limit boundary accepted",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vision/detections/recent?limit=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "detections",
+                "recent?limit=1"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Minimum limit returns success', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Boundary checks response page shape', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.items).to.be.an('array');",
+                  "  pm.expect(json.items.length).to.be.at.most(100);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05_Consumer_side_Smoke",
+      "item": [
+        {
+          "name": "Consumer smoke - AI Vision can callback Camera Stream mock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              },
+              {
+                "key": "Prefer",
+                "value": "code=202"
+              }
+            ],
+            "url": {
+              "raw": "{{cameraStreamMockUrl}}/callbacks/vision",
+              "host": [
+                "{{cameraStreamMockUrl}}"
+              ],
+              "path": [
+                "callbacks",
+                "vision"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"detectionId\": \"det_01HY6AIVISION0000000001\",\n  \"cameraId\": \"CAM-A2-001\",\n  \"motionEventId\": \"motion-20260518-0001\",\n  \"status\": \"COMPLETED\",\n  \"riskLevel\": \"HIGH\",\n  \"overallConfidence\": 1,\n  \"completedAt\": \"2026-05-18T06:10:17Z\",\n  \"correlationId\": \"corr-20260518-vision-0001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Camera Stream mock accepts callback', function () { pm.response.to.have.status(202); });",
+                  "pm.test('Consumer can parse callback acknowledgement', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.accepted).to.eql(true);",
+                  "  pm.expect(json).to.have.property('receivedAt');",
+                  "  pm.expect(json).to.have.property('correlationId');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06_Local_only_NonFunctional",
+      "item": [
+        {
+          "name": "POST /vision/detect - local processing latency threshold",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "idem-CAM-A2-001-20260518-perf"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vision/detect",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "detect"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cameraId\": \"CAM-A2-001\",\n  \"campusId\": \"CAMPUS-HCM\",\n  \"capturedAt\": \"2026-05-18T06:10:15Z\",\n  \"motionEventId\": \"motion-20260518-0001\",\n  \"source\": {\n    \"sourceType\": \"IMAGE_URL\",\n    \"imageUrl\": \"https://media.smart-campus.local/frames/CAM-A2-001/2026/05/18/frame-0001.jpg\",\n    \"checksumSha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"\n  },\n  \"requestedModelVersion\": \"vision-campus-v1.4\",\n  \"callbackUrl\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const env = pm.environment.get('env') || 'mock';",
+                  "if (env === 'local') {",
+                  "  pm.test('Local service responds under 1000ms', function () { pm.expect(pm.response.responseTime).to.be.below(1000); });",
+                  "} else {",
+                  "  pm.test('Skipped on mock: mock latency is not evidence of real service reliability', function () { pm.expect(true).to.eql(true); });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

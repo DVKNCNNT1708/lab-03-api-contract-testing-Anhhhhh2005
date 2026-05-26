@@ -1,102 +1,297 @@
 openapi: 3.1.0
 info:
-  title: Smart Campus — AI Vision API
-  version: 0.3.0
+  title: Smart Campus AI Vision Detection API
+  version: 1.0.0
   description: |
-    Contract mock tối thiểu cho consumer-side smoke test trong FIT4110 Lab 03.
-    File này giúp Camera Stream hoặc Core Business gọi thử AI Vision khi service thật chưa hoàn thiện.
+    Contract-first API for Pair 01: Camera Stream A2 sends frame data or image
+    metadata to AI Vision A4 for object detection in a closed smart education
+    campus environment.
+  contact:
+    name: Nguyen Duc Anh - 1771020050 - Nhom 4
+    email: fit4110@example.edu.vn
 servers:
-  - url: http://localhost:4011
-    description: Prism mock server for AI Vision
+  - url: http://localhost:4010
+    description: Prism mock server
+  - url: https://api.smart-campus.local
+    description: Smart Campus internal network
 tags:
-  - name: vision
-    description: Image detection
-  - name: system
-    description: Health and runtime information
+  - name: health
+    description: Service health status.
+  - name: vision-detections
+    description: Detect objects and retrieve detection results.
+  - name: vision-models
+    description: AI Vision model metadata.
 security:
   - bearerAuth: []
 paths:
   /health:
     get:
-      tags: [system]
-      operationId: getVisionHealth
-      summary: Kiểm tra trạng thái AI Vision mock
-      description: Public health check dùng để kiểm tra mock AI Vision đã sẵn sàng.
+      operationId: getHealth
+      summary: Check AI Vision health
+      description: Returns current availability information for the AI Vision service.
+      tags: [health]
       security: []
       responses:
-        "200":
-          description: Service đang hoạt động
+        '200':
+          description: AI Vision service is available.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HealthResponse"
+                $ref: '#/components/schemas/HealthStatus'
               examples:
                 ok:
                   value:
                     status: ok
                     service: ai-vision
-                    version: 0.3.0
+                    checkedAt: '2026-05-18T06:00:00Z'
 
-  /detect:
+  /vision/detect:
     post:
-      tags: [vision]
-      operationId: detectImage
-      summary: Phát hiện đối tượng trong ảnh
-      description: Endpoint mock tối thiểu để consumer kiểm tra luồng Camera/Core gọi AI Vision.
+      operationId: createVisionDetection
+      summary: Detect objects from a camera frame
+      description: |
+        Camera Stream sends one motion-triggered frame reference or frame metadata.
+        AI Vision returns a detection id, detected objects, confidence, and risk level.
+      tags: [vision-detections]
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DetectionRequest"
+              $ref: '#/components/schemas/DetectionRequest'
             examples:
-              valid_url:
+              imageUrl:
                 value:
-                  camera_id: CAM01
-                  image_url: https://example.com/frame.jpg
+                  cameraId: CAM-A2-001
+                  campusId: CAMPUS-HCM
+                  capturedAt: '2026-05-18T06:10:15Z'
+                  motionEventId: motion-20260518-0001
+                  source:
+                    sourceType: IMAGE_URL
+                    imageUrl: https://media.smart-campus.local/frames/CAM-A2-001/2026/05/18/frame-0001.jpg
+                    checksumSha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                  requestedModelVersion: vision-campus-v1.4
+                  callbackUrl: https://camera-stream.smart-campus.local/callbacks/vision
+              frameMetadata:
+                value:
+                  cameraId: CAM-A2-002
+                  campusId: CAMPUS-HCM
+                  capturedAt: '2026-05-18T06:12:30Z'
+                  motionEventId: motion-20260518-0002
+                  source:
+                    sourceType: FRAME_METADATA
+                    streamId: stream-main-hall-a2
+                    frameNumber: 835122
+                    storageBucket: campus-camera-frames
+                    objectKey: CAM-A2-002/2026/05/18/frame-835122.jpg
+                  requestedModelVersion: vision-campus-v1.4
+                  callbackUrl: https://camera-stream.smart-campus.local/callbacks/vision
       responses:
-        "200":
-          description: Kết quả nhận diện
+        '200':
+          description: Detection completed synchronously.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DetectionResponse"
+                $ref: '#/components/schemas/DetectionResult'
               examples:
-                detected:
+                highRisk:
                   value:
-                    detection_id: DET001
-                    camera_id: CAM01
-                    label: person
-                    confidence: 0.91
-                    risk_level: medium
-        "400":
-          description: Request không hợp lệ
-          content:
-            application/problem+json:
+                    detectionId: det_01HY6AIVISION0000000001
+                    cameraId: CAM-A2-001
+                    motionEventId: motion-20260518-0001
+                    status: COMPLETED
+                    modelVersion: vision-campus-v1.4
+                    objects:
+                      - objectType: PERSON
+                        confidence: 0.97
+                        boundingBox:
+                          x: 0.31
+                          y: 0.22
+                          width: 0.18
+                          height: 0.44
+                        trackId: track-7781
+                      - objectType: UNKNOWN_BAG
+                        confidence: 0.88
+                        boundingBox:
+                          x: 0.58
+                          y: 0.61
+                          width: 0.12
+                          height: 0.18
+                        trackId: track-unknown-bag-7782
+                    overallConfidence: 0.93
+                    riskLevel: HIGH
+                    riskReason: Unknown bag detected in restricted hallway.
+                    createdAt: '2026-05-18T06:10:16Z'
+                    completedAt: '2026-05-18T06:10:17Z'
+                    correlationId: corr-20260518-vision-0001
+        '202':
+          description: Detection accepted for asynchronous processing.
+          headers:
+            Location:
+              description: URI where Camera Stream can poll the detection result.
               schema:
-                $ref: "#/components/schemas/ProblemDetails"
-              examples:
-                invalid_image:
-                  value:
-                    type: https://smart-campus.local/problems/invalid-image
-                    title: Invalid image
-                    status: 400
-                    detail: image_url or image_base64 is required
-                    instance: /detect
-        "401":
-          description: Thiếu hoặc sai token
+                type: string
+                format: uri
           content:
-            application/problem+json:
+            application/json:
               schema:
-                $ref: "#/components/schemas/ProblemDetails"
+                $ref: '#/components/schemas/DetectionAccepted'
               examples:
-                unauthorized:
+                accepted:
                   value:
-                    type: https://smart-campus.local/problems/unauthorized
-                    title: Unauthorized
-                    status: 401
-                    detail: Missing or invalid bearer token
-                    instance: /detect
+                    detectionId: det_01HY6AIVISION0000000002
+                    status: PENDING
+                    pollUrl: http://localhost:4010/vision/detections/det_01HY6AIVISION0000000002
+                    acceptedAt: '2026-05-18T06:12:31Z'
+                    correlationId: corr-20260518-vision-0002
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /vision/detections/{detectionId}:
+    get:
+      operationId: getVisionDetection
+      summary: Get detection result
+      description: Returns one previous detection result by detection id for polling or audit.
+      tags: [vision-detections]
+      parameters:
+        - $ref: '#/components/parameters/DetectionId'
+        - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          description: Detection result detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetectionResult'
+              examples:
+                completed:
+                  value:
+                    detectionId: det_01HY6AIVISION0000000001
+                    cameraId: CAM-A2-001
+                    motionEventId: motion-20260518-0001
+                    status: COMPLETED
+                    modelVersion: vision-campus-v1.4
+                    objects:
+                      - objectType: PERSON
+                        confidence: 0.97
+                        boundingBox:
+                          x: 0.31
+                          y: 0.22
+                          width: 0.18
+                          height: 0.44
+                        trackId: track-7781
+                    overallConfidence: 0.97
+                    riskLevel: MEDIUM
+                    riskReason: Person detected after class hours.
+                    createdAt: '2026-05-18T06:10:16Z'
+                    completedAt: '2026-05-18T06:10:17Z'
+                    correlationId: corr-20260518-vision-0001
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /vision/models/info:
+    get:
+      operationId: getVisionModelInfo
+      summary: Get AI Vision model information
+      description: Returns active model version, supported object types, and operational limits.
+      tags: [vision-models]
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          description: AI Vision model metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisionModelInfo'
+              examples:
+                activeModel:
+                  value:
+                    modelVersion: vision-campus-v1.4
+                    status: ACTIVE
+                    supportedSourceTypes: [IMAGE_URL, FRAME_METADATA]
+                    supportedObjectTypes: [PERSON, VEHICLE, UNKNOWN_BAG, SMOKE, FIRE]
+                    maxImageBytes: 5242880
+                    maxProcessingMs: 800
+                    updatedAt: '2026-05-15T09:00:00Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /vision/detections/recent:
+    get:
+      operationId: listRecentVisionDetections
+      summary: List recent detections
+      description: Returns recent detection summaries for Camera Stream reconciliation after retries.
+      tags: [vision-detections]
+      parameters:
+        - $ref: '#/components/parameters/CameraIdQuery'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          description: Recent detection result page.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetectionResultPage'
+              examples:
+                firstPage:
+                  value:
+                    items:
+                      - detectionId: det_01HY6AIVISION0000000001
+                        cameraId: CAM-A2-001
+                        motionEventId: motion-20260518-0001
+                        status: COMPLETED
+                        modelVersion: vision-campus-v1.4
+                        objects:
+                          - objectType: PERSON
+                            confidence: 0.97
+                            boundingBox:
+                              x: 0.31
+                              y: 0.22
+                              width: 0.18
+                              height: 0.44
+                            trackId: track-7781
+                        overallConfidence: 0.97
+                        riskLevel: MEDIUM
+                        riskReason: Person detected after class hours.
+                        createdAt: '2026-05-18T06:10:16Z'
+                        completedAt: '2026-05-18T06:10:17Z'
+                        correlationId: corr-20260518-vision-0001
+                    nextCursor: cursor-next-page
+                    hasMore: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
 components:
   securitySchemes:
@@ -105,65 +300,414 @@ components:
       scheme: bearer
       bearerFormat: JWT
 
+  parameters:
+    CorrelationId:
+      name: X-Correlation-Id
+      in: header
+      required: false
+      description: Correlation id used for tracing a camera frame across services.
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 80
+      example: corr-20260518-vision-0001
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Unique key for one motion frame request, used to prevent duplicate processing on retry.
+      schema:
+        type: string
+        minLength: 12
+        maxLength: 120
+      example: idem-CAM-A2-001-20260518-0001
+    DetectionId:
+      name: detectionId
+      in: path
+      required: true
+      description: Stable identifier of a detection job/result.
+      schema:
+        type: string
+        pattern: '^det_[A-Za-z0-9]+$'
+      example: det_01HY6AIVISION0000000001
+    CameraIdQuery:
+      name: cameraId
+      in: query
+      required: false
+      description: Filter recent detections by camera id.
+      schema:
+        type: string
+        minLength: 3
+        maxLength: 60
+      example: CAM-A2-001
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Maximum number of items to return.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: Cursor returned from the previous page.
+      schema:
+        type: string
+        nullable: true
+        minLength: 1
+        maxLength: 200
+
+  responses:
+    BadRequest:
+      description: Request is not valid JSON or does not match the schema.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          examples:
+            invalidJson:
+              value:
+                type: https://api.smart-campus.local/problems/bad-request
+                title: Bad Request
+                status: 400
+                detail: Request body is malformed or missing a required field.
+                instance: /vision/detect
+                correlationId: corr-20260518-vision-0001
+    Unauthorized:
+      description: Bearer token is missing or invalid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Forbidden:
+      description: Caller is authenticated but cannot access this resource.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: Requested detection does not exist.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Conflict:
+      description: Idempotency key conflicts with a different detection payload.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    PayloadTooLarge:
+      description: Image or referenced frame exceeds the negotiated size limit.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    UnprocessableEntity:
+      description: Request is syntactically valid but the image cannot be processed.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    InternalServerError:
+      description: Unexpected provider error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+
   schemas:
+    HealthStatus:
+      type: object
+      additionalProperties: false
+      required: [status, service, checkedAt]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        service:
+          type: string
+        checkedAt:
+          type: string
+          format: date-time
+
     DetectionRequest:
       type: object
-      required: [camera_id]
+      additionalProperties: false
+      required: [cameraId, campusId, capturedAt, motionEventId, source, requestedModelVersion, callbackUrl]
       properties:
-        camera_id:
+        cameraId:
           type: string
           minLength: 3
-          example: CAM01
-        image_url:
+          maxLength: 60
+        campusId:
+          type: string
+          minLength: 3
+          maxLength: 40
+        capturedAt:
+          type: string
+          format: date-time
+        motionEventId:
+          type: string
+          minLength: 8
+          maxLength: 80
+        source:
+          $ref: '#/components/schemas/FrameSource'
+        requestedModelVersion:
+          type: string
+          nullable: true
+          minLength: 3
+          maxLength: 80
+        callbackUrl:
+          type: string
+          nullable: true
+          format: uri
+
+    FrameSource:
+      oneOf:
+        - $ref: '#/components/schemas/ImageUrlFrameSource'
+        - $ref: '#/components/schemas/FrameMetadataSource'
+      discriminator:
+        propertyName: sourceType
+        mapping:
+          IMAGE_URL: '#/components/schemas/ImageUrlFrameSource'
+          FRAME_METADATA: '#/components/schemas/FrameMetadataSource'
+
+    ImageUrlFrameSource:
+      type: object
+      additionalProperties: false
+      required: [sourceType, imageUrl, checksumSha256]
+      properties:
+        sourceType:
+          type: string
+          const: IMAGE_URL
+        imageUrl:
           type: string
           format: uri
-          example: https://example.com/frame.jpg
-        image_base64:
+        checksumSha256:
           type: string
-          description: Chuỗi base64 nếu không dùng image_url
+          pattern: '^[a-f0-9]{64}$'
 
-    DetectionResponse:
+    FrameMetadataSource:
       type: object
-      required: [detection_id, label, confidence, risk_level]
+      additionalProperties: false
+      required: [sourceType, streamId, frameNumber, storageBucket, objectKey]
       properties:
-        detection_id:
+        sourceType:
           type: string
-          example: DET001
-        camera_id:
+          const: FRAME_METADATA
+        streamId:
           type: string
-          example: CAM01
-        label:
+          minLength: 3
+          maxLength: 80
+        frameNumber:
+          type: integer
+          minimum: 0
+        storageBucket:
           type: string
-          enum: [person, vehicle, unknown]
-          example: person
+          minLength: 3
+          maxLength: 120
+        objectKey:
+          type: string
+          minLength: 3
+          maxLength: 300
+
+    DetectionAccepted:
+      type: object
+      additionalProperties: false
+      required: [detectionId, status, pollUrl, acceptedAt, correlationId]
+      properties:
+        detectionId:
+          type: string
+          pattern: '^det_[A-Za-z0-9]+$'
+        status:
+          type: string
+          const: PENDING
+        pollUrl:
+          type: string
+          format: uri
+        acceptedAt:
+          type: string
+          format: date-time
+        correlationId:
+          type: string
+
+    DetectionResult:
+      type: object
+      additionalProperties: false
+      required:
+        - detectionId
+        - cameraId
+        - motionEventId
+        - status
+        - modelVersion
+        - objects
+        - overallConfidence
+        - riskLevel
+        - riskReason
+        - createdAt
+        - completedAt
+        - correlationId
+      properties:
+        detectionId:
+          type: string
+          pattern: '^det_[A-Za-z0-9]+$'
+        cameraId:
+          type: string
+          minLength: 3
+          maxLength: 60
+        motionEventId:
+          type: string
+          minLength: 8
+          maxLength: 80
+        status:
+          type: string
+          enum: [PENDING, COMPLETED, FAILED]
+        modelVersion:
+          type: string
+          minLength: 3
+          maxLength: 80
+        objects:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/DetectedObject'
+        overallConfidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        riskLevel:
+          $ref: '#/components/schemas/RiskLevel'
+        riskReason:
+          type: string
+          nullable: true
+          maxLength: 300
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          nullable: true
+          format: date-time
+        correlationId:
+          type: string
+          minLength: 8
+          maxLength: 80
+
+    DetectionResultPage:
+      type: object
+      additionalProperties: false
+      required: [items, nextCursor, hasMore]
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/DetectionResult'
+        nextCursor:
+          type: string
+          nullable: true
+          maxLength: 200
+        hasMore:
+          type: boolean
+
+    DetectedObject:
+      type: object
+      additionalProperties: false
+      required: [objectType, confidence, boundingBox, trackId]
+      properties:
+        objectType:
+          $ref: '#/components/schemas/DetectedObjectType'
         confidence:
           type: number
           minimum: 0
           maximum: 1
-          example: 0.91
-        risk_level:
+        boundingBox:
+          $ref: '#/components/schemas/BoundingBox'
+        trackId:
           type: string
-          enum: [low, medium, high]
-          example: medium
+          nullable: true
+          minLength: 3
+          maxLength: 80
 
-    HealthResponse:
+    BoundingBox:
       type: object
-      required: [status, service, version]
+      additionalProperties: false
+      required: [x, y, width, height]
       properties:
+        x:
+          type: number
+          minimum: 0
+          maximum: 1
+        y:
+          type: number
+          minimum: 0
+          maximum: 1
+        width:
+          type: number
+          minimum: 0
+          maximum: 1
+        height:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    VisionModelInfo:
+      type: object
+      additionalProperties: false
+      required:
+        - modelVersion
+        - status
+        - supportedSourceTypes
+        - supportedObjectTypes
+        - maxImageBytes
+        - maxProcessingMs
+        - updatedAt
+      properties:
+        modelVersion:
+          type: string
         status:
           type: string
-          enum: [ok]
-          example: ok
-        service:
+          enum: [ACTIVE, DEGRADED, RETIRED]
+        supportedSourceTypes:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            enum: [IMAGE_URL, FRAME_METADATA]
+        supportedObjectTypes:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/DetectedObjectType'
+        maxImageBytes:
+          type: integer
+          minimum: 1
+        maxProcessingMs:
+          type: integer
+          minimum: 1
+        updatedAt:
           type: string
-          example: ai-vision
-        version:
-          type: string
-          example: 0.3.0
+          format: date-time
 
-    ProblemDetails:
+    DetectedObjectType:
+      type: string
+      enum: [PERSON, VEHICLE, UNKNOWN_BAG, SMOKE, FIRE]
+
+    RiskLevel:
+      type: string
+      enum: [LOW, MEDIUM, HIGH, CRITICAL]
+
+    Problem:
       type: object
-      required: [type, title, status, detail]
+      additionalProperties: false
+      required: [type, title, status, detail, instance, correlationId]
       properties:
         type:
           type: string
@@ -178,3 +722,18 @@ components:
           type: string
         instance:
           type: string
+        correlationId:
+          type: string
+          nullable: true
+        errors:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: false
+            required: [field, message]
+            properties:
+              field:
+                type: string
+              message:
+                type: string

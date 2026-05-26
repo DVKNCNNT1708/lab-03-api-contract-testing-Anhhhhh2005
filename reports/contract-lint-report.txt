@@ -1,0 +1,5 @@
+
+> fit4110_lab03_postman_mock_testing@0.3.0 lint:contracts
+> spectral lint contracts/ai-vision.openapi.yaml contracts/camera-stream.openapi.yaml --fail-severity error
+
+No results with a severity of 'error' found!
